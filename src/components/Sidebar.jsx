@@ -40,6 +40,8 @@ export default function Sidebar() {
 
       <MenuLink to="/dashboard" icon={<LayoutDashboard size={18} />} text="Dashboard" />
 
+          <MenuLink to="/upload" icon={null} text="Upload Report" />
+
       <MenuLink to="/digital-twin" icon={<Brain size={18} />} text="Digital Twin" />
 
       <MenuLink to="/timeline" icon={<Calendar size={18} />} text="Health Timeline" />

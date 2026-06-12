@@ -11,11 +11,11 @@ import RecommendationCard from "../components/RecommendationCard";
 
 export default function Dashboard() {
 
-  const [displayData, setDisplayData] = useState(null);
+  const [report, setReport] = useState(null);
 
   const loadDisplayData = (rawReport) => {
     const built = buildDashboardDisplay(rawReport || {});
-    setDisplayData(built);
+    setReport(built);
     return built;
   };
 
@@ -85,29 +85,29 @@ export default function Dashboard() {
           marginTop: "20px"
         }}
       >
-        <StatsCard
-          title="Sleep Score"
-          value={`${lookup(report, "sleepScore", "sleep_score", "sleep") ?? 0}/100`}
-          status="AI Generated"
-        />
+          <StatsCard
+            title="Sleep Score"
+            value={`${report?.sleepScore ?? 0}/100`}
+            status="AI Generated"
+          />
 
-        <StatsCard
-          title="Heart Score"
-          value={`${lookup(report, "heartScore", "heart_score", "heart") ?? 0}/100`}
-          status="AI Generated"
-        />
+          <StatsCard
+            title="Heart Score"
+            value={`${report?.heartScore ?? 0}/100`}
+            status="AI Generated"
+          />
 
-        <StatsCard
-          title="Stress Score"
-          value={`${lookup(report, "stressScore", "stress_score", "stress") ?? 0}/100`}
-          status="AI Generated"
-        />
+          <StatsCard
+            title="Stress Score"
+            value={`${report?.stressScore ?? 0}/100`}
+            status="AI Generated"
+          />
 
-        <StatsCard
-          title="Recovery Score"
-          value={`${lookup(report, "recoveryScore", "recovery_score", "recovery") ?? 0}/100`}
-          status="AI Generated"
-        />
+          <StatsCard
+            title="Recovery Score"
+            value={`${report?.recoveryScore ?? 0}/100`}
+            status="AI Generated"
+          />
       </div>
 
       <div
@@ -197,15 +197,7 @@ export default function Dashboard() {
 
         <RecommendationCard
           title="AI Recommendation"
-          text={
-            lookup(
-              report,
-              "suggestions",
-              "suggestion",
-              "recommendations",
-              "recommendation"
-            ) ?? "No recommendations available"
-          }
+          text={report?.suggestions ?? "No recommendations available"}
         />
       </div>
 
@@ -227,14 +219,7 @@ export default function Dashboard() {
             lineHeight: "1.8"
           }}
         >
-          {lookup(
-            report,
-            "diseaseRisks",
-            "disease_risks",
-            "riskFactors",
-            "risk_factors",
-            "disease_risk"
-          ) ?? "No disease risks identified"}
+          {report?.diseaseRisks ?? "No disease risks identified"}
         </p>
       </div>
     </>
