@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8090/api",
+  baseURL: "https://cognivuex-backend-1.onrender.com/api",
 });
 
 export const getLatestReport = () =>
