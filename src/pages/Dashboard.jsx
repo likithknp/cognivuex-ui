@@ -64,9 +64,6 @@ export default function Dashboard() {
 
   return (
     <>
-    <div className="bg-red-500 text-white p-8 rounded-3xl mb-4">
-          Tailwind Working
-        </div>
       <h1>Health Intelligence Dashboard</h1>
 
       <p
