@@ -63,14 +63,14 @@ export default function Login() {
     >
       <div
         className="
-        w-[420px]
+        w-[520px]
         bg-white/90
         backdrop-blur-lg
         rounded-[28px]
         shadow-xl
         border
         border-slate-200
-        p-8
+        p-10
       "
       >
         {/* Logo */}
