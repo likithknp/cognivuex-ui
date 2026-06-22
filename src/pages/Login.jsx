@@ -4,9 +4,7 @@ import { loginUser } from "../services/authService";
 import {
   Mail,
   Lock,
-  Eye,
-  Chrome,
-  Apple,
+  Eye
 } from "lucide-react";
 
 export default function Login() {
@@ -248,7 +246,7 @@ export default function Login() {
             gap-2
           "
           >
-            <Chrome size={18} />
+            <span>G</span>
             Google
           </button>
 
@@ -264,7 +262,7 @@ export default function Login() {
             gap-2
           "
           >
-            <Apple size={18} />
+            <span></span>
             Apple
           </button>
         </div>

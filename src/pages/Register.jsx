@@ -4,9 +4,7 @@ import {
   User,
   Mail,
   Lock,
-  Eye,
-  Chrome,
-  Apple,
+  Eye
 } from "lucide-react";
 
 export default function Register() {
@@ -323,7 +321,7 @@ export default function Register() {
             gap-2
           "
           >
-            <Chrome size={18} />
+            <span>G</span>
             Google
           </button>
 
@@ -339,7 +337,7 @@ export default function Register() {
             gap-2
           "
           >
-            <Apple size={18} />
+            <span></span>
             Apple
           </button>
         </div>
