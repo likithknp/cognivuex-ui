@@ -15,6 +15,9 @@ import AIConfidence from "./pages/AIConfidence";
 import AIReasoning from "./pages/AIReasoning";
 import Settings from "./pages/Settings";
 
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
 import SleepIntelligence from "./pages/SleepIntelligence";
 import HeartIntelligence from "./pages/HeartIntelligence";
 import CognitiveWellness from "./pages/CognitiveWellness";
@@ -28,6 +31,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
         <Route element={<MainLayout />}>
 
