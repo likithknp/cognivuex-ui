@@ -97,8 +97,15 @@ export default function Copilot() {
         throw new Error(errText || `Backend returned ${res.status}`);
       }
 
-      const data = await res.json();
-      const { answer, score, findings, extractedText } = data;
+      let data = null;
+      try {
+        // attempt parse JSON; if invalid, capture text for error
+        data = await res.json();
+      } catch (parseErr) {
+        const txt = await res.text().catch(() => '');
+        throw new Error(`Invalid JSON from backend: ${txt || parseErr.message}`);
+      }
+      const { answer, score, findings, extractedText } = data || {};
       let assistantText = answer || 'Sorry, I could not compute an answer.';
       if (typeof score === 'number') assistantText += `\n\nHealth score: ${score}%`;
       if (Array.isArray(findings) && findings.length) assistantText += `\nFindings: ${findings.join('; ')}`;
