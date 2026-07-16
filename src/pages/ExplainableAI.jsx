@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const featureSets = [
   {
@@ -37,6 +37,17 @@ function ProgressBar({ value }) {
 }
 
 export default function ExplainableAI() {
+  const [latest, setLatest] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/reports/latest')
+      .then((r) => r.json())
+      .then((j) => setLatest(j.latest))
+      .catch(() => setLatest(null));
+  }, []);
+
+  const score = latest?.score ?? 96;
+
   return (
     <div style={{ padding: 24, fontFamily: 'Inter, Arial, sans-serif' }}>
       <h2 style={{ margin: 0, marginBottom: 16 }}>ExplainableAIDashboard</h2>
@@ -60,7 +71,7 @@ export default function ExplainableAI() {
           <div style={{ opacity: 0.9, marginTop: 6 }}>Explainable and trustworthy AI insights</div>
         </div>
 
-        <div style={{ fontSize: 48, fontWeight: 800 }}>96%</div>
+        <div style={{ fontSize: 48, fontWeight: 800 }}>{score}%</div>
       </div>
 
       <div style={{ display: 'flex', gap: 20, marginTop: 20 }}>
@@ -89,6 +100,15 @@ export default function ExplainableAI() {
           </div>
         ))}
       </div>
+
+      {latest && (
+        <div style={{ marginTop: 20, background: '#fff', padding: 16, borderRadius: 8, border: '1px solid #eef3f8' }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Latest analysis</div>
+          <div style={{ color: '#475569' }}>Score: {latest.score}%</div>
+          <div style={{ color: '#475569' }}>Findings: {latest.findings?.join(', ')}</div>
+          <div style={{ marginTop: 8, color: '#64748b' }}>Files: {latest.files?.map(f => f.originalName).join(', ')}</div>
+        </div>
+      )}
     </div>
   );
 }

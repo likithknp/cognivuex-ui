@@ -60,7 +60,7 @@ export default function Copilot() {
       form.append('question', question);
       files.forEach((f) => form.append('files', f));
 
-      const res = await fetch('http://localhost:4000/api/copilot', {
+      const res = await fetch('/api/copilot', {
         method: 'POST',
         body: form,
       });
