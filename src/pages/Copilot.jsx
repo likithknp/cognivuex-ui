@@ -68,10 +68,11 @@ export default function Copilot() {
       if (!res.ok) throw new Error('Backend unavailable');
 
       const data = await res.json();
-      const { answer, score, findings } = data;
+      const { answer, score, findings, extractedText } = data;
       let assistantText = answer || 'Sorry, I could not compute an answer.';
       if (typeof score === 'number') assistantText += `\n\nHealth score: ${score}%`;
       if (Array.isArray(findings) && findings.length) assistantText += `\nFindings: ${findings.join('; ')}`;
+      if (extractedText) assistantText += `\n\nExtracted text (preview):\n${extractedText.slice(0, 500)}`;
 
       setMessages((m) => [...m, { role: 'assistant', text: assistantText }]);
       // clear files after successful analysis
