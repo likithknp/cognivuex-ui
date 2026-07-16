@@ -65,7 +65,10 @@ export default function Copilot() {
         body: form,
       });
 
-      if (!res.ok) throw new Error('Backend unavailable');
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || `Backend returned ${res.status}`);
+      }
 
       const data = await res.json();
       const { answer, score, findings, extractedText } = data;
