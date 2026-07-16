@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://cognivuex-backend-1.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_BASE_URL || "/api",
 });
 
 export const getLatestReport = () =>
