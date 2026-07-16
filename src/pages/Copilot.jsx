@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function MessageBubble({ role, text }) {
   const isUser = role === 'user';
@@ -11,6 +11,7 @@ function MessageBubble({ role, text }) {
   };
   const bubbleStyle = {
     maxWidth: '78%',
+    whiteSpace: 'pre-wrap',
     background: isUser ? '#0b72ff' : '#eef8ff',
     color: isUser ? 'white' : '#0b3b66',
     padding: '12px 16px',
@@ -35,31 +36,49 @@ export default function Copilot() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState([]);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    // auto-scroll to bottom when messages change
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   async function sendMessage() {
     const question = input.trim();
-    if (!question) return;
-    const userMsg = { role: 'user', text: question };
+    if (!question && files.length === 0) return;
+
+    const userMsg = { role: 'user', text: question || (files.length ? 'Uploaded reports for analysis' : '') };
     setMessages((m) => [...m, userMsg]);
     setInput('');
     setLoading(true);
 
     try {
-      const res = await fetch('/api/copilot', {
+      const form = new FormData();
+      form.append('question', question);
+      files.forEach((f) => form.append('files', f));
+
+      const res = await fetch('http://localhost:4000/api/copilot', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question }),
+        body: form,
       });
 
       if (!res.ok) throw new Error('Backend unavailable');
 
       const data = await res.json();
-      // Expecting { answer: '...' }
-      const answer = data?.answer ?? 'Sorry, I could not compute an answer.';
-      setMessages((m) => [...m, { role: 'assistant', text: answer }]);
+      const { answer, score, findings } = data;
+      let assistantText = answer || 'Sorry, I could not compute an answer.';
+      if (typeof score === 'number') assistantText += `\n\nHealth score: ${score}%`;
+      if (Array.isArray(findings) && findings.length) assistantText += `\nFindings: ${findings.join('; ')}`;
+
+      setMessages((m) => [...m, { role: 'assistant', text: assistantText }]);
+      // clear files after successful analysis
+      setFiles([]);
     } catch (err) {
       // Fallback simulated response when backend not reachable — small heuristic for realistic reply
-      const fallback = generateFallbackReply(question);
+      const fallback = generateFallbackReply(question, files);
       setMessages((m) => [...m, { role: 'assistant', text: fallback }]);
     } finally {
       setLoading(false);
@@ -73,19 +92,24 @@ export default function Copilot() {
     }
   }
 
-  function generateFallbackReply(question) {
-    const q = question.toLowerCase();
-    if (q.includes('sleep')) {
-      return 'Based on typical patterns, improving sleep consistency and avoiding screens before bed can raise your sleep quality. Track sleep duration and REM for tailored advice.';
-    }
-    if (q.includes('heart') || q.includes('bp') || q.includes('blood')) {
-      return 'For heart health, prioritise regular aerobic activity, maintain a healthy sodium intake, and monitor resting heart rate trends. Consult a clinician for abnormal readings.';
-    }
-    if (q.includes('nutrition') || q.includes('diet')) {
-      return 'Focus on balanced meals with lean protein, whole grains and vegetables. Track macros and consider a nutritionist for personalised plans.';
-    }
-    // generic helpful reply
-    return 'I don\'t have live backend access right now. Generally, I can analyze your health metrics, highlight risk factors, and suggest interventions. Provide more details (e.g., sleep hours, activity, blood pressure) for a focused answer.';
+  function generateFallbackReply(question, uploadedFiles) {
+    const q = (question || '').toLowerCase();
+    const fileText = uploadedFiles.map((f) => f.name.toLowerCase()).join(' ');
+    const combined = `${q} ${fileText}`;
+
+    let score = 80;
+    const findings = [];
+    if (combined.includes('cholesterol') || combined.includes('ldl')) { findings.push('High cholesterol'); score -= 15; }
+    if (combined.includes('blood pressure') || combined.includes('bp') || combined.includes('hypertension')) { findings.push('Blood pressure concerns'); score -= 12; }
+    if (combined.includes('glucose') || combined.includes('hba1c') || combined.includes('sugar')) { findings.push('Elevated glucose'); score -= 12; }
+    if (combined.includes('normal') || combined.includes('within range')) { score += 6; }
+    score = Math.max(10, Math.min(99, score));
+
+    let reply = 'I don\'t have live backend access right now. Here is a simulated analysis based on provided inputs.';
+    reply += `\n\nHealth score (simulated): ${score}%`;
+    if (findings.length) reply += `\nFindings: ${findings.join('; ')}`;
+    reply += '\n\nProvide more specific values (e.g., cholesterol: 240 mg/dL, BP: 140/90) for a focused recommendation.';
+    return reply;
   }
 
   return (
@@ -109,49 +133,61 @@ export default function Copilot() {
           <div style={{ width: 44, height: 44, borderRadius: 10, background: '#eef8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤖</div>
           <div>
             <div style={{ fontWeight: 700 }}>AI Health Assistant</div>
-            <div style={{ color: '#64748b', fontSize: 13 }}>Ask me anything about your health</div>
+            <div style={{ color: '#64748b', fontSize: 13 }}>Ask me anything about your health or upload reports for analysis</div>
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', paddingRight: 8 }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: 8 }} ref={containerRef}>
           {messages.map((m, i) => (
             <MessageBubble key={i} role={m.role} text={m.text} />
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <textarea
-            placeholder="Ask about your health..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKeyDown}
-            style={{
-              flex: 1,
-              resize: 'none',
-              padding: '12px 14px',
-              borderRadius: 10,
-              border: '1px solid #e6eef7',
-              minHeight: 44,
-              fontSize: 14,
-            }}
-            disabled={loading}
-          />
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexDirection: 'column' }}>
+          <div style={{ alignSelf: 'stretch', display: 'flex', gap: 12, alignItems: 'center' }}>
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setFiles(Array.from(e.target.files))}
+              disabled={loading}
+            />
+            <div style={{ fontSize: 13, color: '#475569' }}>{files.length ? `${files.length} file(s) selected` : 'No files selected'}</div>
+          </div>
 
-          <button
-            onClick={sendMessage}
-            disabled={loading}
-            style={{
-              background: loading ? '#9bbffb' : 'linear-gradient(90deg,#0b72ff,#4c6bff)',
-              color: 'white',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: 10,
-              cursor: loading ? 'default' : 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            {loading ? 'Thinking…' : 'Send'}
-          </button>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%' }}>
+            <textarea
+              placeholder="Ask about your health..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKeyDown}
+              style={{
+                flex: 1,
+                resize: 'none',
+                padding: '12px 14px',
+                borderRadius: 10,
+                border: '1px solid #e6eef7',
+                minHeight: 44,
+                fontSize: 14,
+              }}
+              disabled={loading}
+            />
+
+            <button
+              onClick={sendMessage}
+              disabled={loading}
+              style={{
+                background: loading ? '#9bbffb' : 'linear-gradient(90deg,#0b72ff,#4c6bff)',
+                color: 'white',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: 10,
+                cursor: loading ? 'default' : 'pointer',
+                fontWeight: 700,
+              }}
+            >
+              {loading ? 'Analyzing…' : 'Send'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
