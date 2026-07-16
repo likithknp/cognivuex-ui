@@ -144,17 +144,36 @@ export default function Copilot() {
         </div>
 
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexDirection: 'column' }}>
-          <div style={{ alignSelf: 'stretch', display: 'flex', gap: 12, alignItems: 'center' }}>
-            <input
-              type="file"
-              multiple
-              onChange={(e) => setFiles(Array.from(e.target.files))}
-              disabled={loading}
-            />
-            <div style={{ fontSize: 13, color: '#475569' }}>{files.length ? `${files.length} file(s) selected` : 'No files selected'}</div>
-          </div>
+          {/* hidden file input triggered by the + button */}
+          <input
+            id="copilot-file-input"
+            type="file"
+            multiple
+            style={{ display: 'none' }}
+            onChange={(e) => setFiles(Array.from(e.target.files))}
+            disabled={loading}
+          />
 
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%' }}>
+            <button
+              onClick={() => document.getElementById('copilot-file-input').click()}
+              title="Attach reports"
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                border: '1px solid #e6eef7',
+                background: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 20,
+                cursor: loading ? 'default' : 'pointer',
+              }}
+            >
+              +
+            </button>
+
             <textarea
               placeholder="Ask about your health..."
               value={input}
@@ -187,6 +206,18 @@ export default function Copilot() {
             >
               {loading ? 'Analyzing…' : 'Send'}
             </button>
+          </div>
+
+          <div style={{ alignSelf: 'stretch', display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+            <div style={{ fontSize: 13, color: '#475569' }}>{files.length ? `${files.length} file(s) selected` : 'No files selected'}</div>
+            {files.length > 0 && (
+              <button
+                onClick={() => setFiles([])}
+                style={{ background: 'transparent', border: 'none', color: '#0b72ff', cursor: 'pointer' }}
+              >
+                Clear
+              </button>
+            )}
           </div>
         </div>
       </div>
