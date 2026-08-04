@@ -109,9 +109,12 @@ export default function Copilot() {
       }
       const { answer, score, findings, extractedText } = data || {};
       let assistantText = answer || 'Sorry, I could not compute an answer.';
-      if (typeof score === 'number') assistantText += `\n\nHealth score: ${score}%`;
-      if (Array.isArray(findings) && findings.length) assistantText += `\nFindings: ${findings.join('; ')}`;
-      if (extractedText) assistantText += `\n\nExtracted text (preview):\n${extractedText.slice(0, 500)}`;
+      // Only show health score if files were uploaded or question relates to health analysis
+      const hasFiles = files.length > 0;
+      const isHealthAnalysisQuestion = question.toLowerCase().match(/health|score|analysis|report|data|risk|disease/);
+      if (typeof score === 'number' && (hasFiles || isHealthAnalysisQuestion)) assistantText += `\n\nHealth score: ${score}%`;
+      if (Array.isArray(findings) && findings.length && (hasFiles || isHealthAnalysisQuestion)) assistantText += `\nFindings: ${findings.join('; ')}`;
+      if (extractedText && (hasFiles || isHealthAnalysisQuestion)) assistantText += `\n\nExtracted text (preview):\n${extractedText.slice(0, 500)}`;
 
       setMessages((m) => [...m, { role: 'assistant', text: assistantText }]);
       // clear files after successful analysis
