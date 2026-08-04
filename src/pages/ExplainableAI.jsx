@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const featureSets = [
   {
     title: 'AI Feature Importance 1',
@@ -40,7 +42,7 @@ export default function ExplainableAI() {
   const [latest, setLatest] = useState(null);
 
   useEffect(() => {
-    fetch('/api/reports/latest')
+    fetch(`${API_BASE_URL}/reports/latest`)
       .then((r) => r.json())
       .then((j) => setLatest(j.latest))
       .catch(() => setLatest(null));

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 function MessageBubble({ role, text }) {
   const isUser = role === 'user';
   const isError = role === 'error';
@@ -50,7 +52,7 @@ export default function Copilot() {
 
   useEffect(() => {
     // health check on mount
-    fetch('/api/health')
+    fetch(`${API_BASE_URL}/health`)
       .then((r) => r.json())
       .then(() => setBackendHealthy(true))
       .catch(() => setBackendHealthy(false));
@@ -64,7 +66,7 @@ export default function Copilot() {
   async function openReportsModal() {
     setShowReportsModal(true);
     try {
-      const r = await fetch('/api/reports');
+      const r = await fetch(`${API_BASE_URL}/reports`);
       const j = await r.json();
       setReportsList(j.reports || []);
     } catch (e) {
@@ -87,7 +89,7 @@ export default function Copilot() {
       form.append('question', question);
       files.forEach((f) => form.append('files', f));
 
-      const res = await fetch('/api/copilot', {
+      const res = await fetch(`${API_BASE_URL}/copilot`, {
         method: 'POST',
         body: form,
       });
@@ -287,7 +289,7 @@ export default function Copilot() {
                       // fetch full report and append its extracted text into chat without selecting
                       try {
                         const q = prompt('Add an optional question for this report (leave empty to just analyze):') || '';
-                        const res = await fetch(`/api/reports/${r.id}`);
+                        const res = await fetch(`${API_BASE_URL}/reports/${r.id}`);
                         const j = await res.json();
                         const report = j.report;
                         const assistantText = `Loaded report ${report.id}. Score: ${report.score}%\nFindings: ${report.findings.join('; ')}\nFiles: ${report.files.map(f=>f.originalName).join(', ')}`;
