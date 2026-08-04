@@ -109,10 +109,8 @@ export default function Copilot() {
       }
       const { answer, score, findings, extractedText } = data || {};
       let assistantText = answer || 'Sorry, I could not compute an answer.';
-      
-      // Only show health metrics if score is NOT null (indicates report was analyzed)
-      if (score !== null && typeof score === 'number') assistantText += `\n\nHealth score: ${score}%`;
-      if (extractedText && Array.isArray(findings) && findings.length) assistantText += `\nFindings: ${findings.join('; ')}`;
+      if (typeof score === 'number') assistantText += `\n\nHealth score: ${score}%`;
+      if (Array.isArray(findings) && findings.length) assistantText += `\nFindings: ${findings.join('; ')}`;
       if (extractedText) assistantText += `\n\nExtracted text (preview):\n${extractedText.slice(0, 500)}`;
 
       setMessages((m) => [...m, { role: 'assistant', text: assistantText }]);
